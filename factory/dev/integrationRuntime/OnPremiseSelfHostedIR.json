@@ -1,0 +1,7 @@
+{
+	"name": "OnPremiseSelfHostedIR",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "My laptop connectoin"
+	}
+}
