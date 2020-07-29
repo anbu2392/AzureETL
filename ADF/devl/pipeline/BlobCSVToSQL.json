@@ -34,8 +34,9 @@
 						"mappings": [
 							{
 								"source": {
+									"name": "Id",
 									"type": "String",
-									"ordinal": 1
+									"physicalType": "String"
 								},
 								"sink": {
 									"name": "ID",
@@ -45,8 +46,9 @@
 							},
 							{
 								"source": {
+									"name": "Name",
 									"type": "String",
-									"ordinal": 2
+									"physicalType": "String"
 								},
 								"sink": {
 									"name": "Name",
@@ -56,8 +58,9 @@
 							},
 							{
 								"source": {
+									"name": "Address",
 									"type": "String",
-									"ordinal": 3
+									"physicalType": "String"
 								},
 								"sink": {
 									"name": "Address",
