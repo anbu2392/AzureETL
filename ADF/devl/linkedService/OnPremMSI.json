@@ -1,0 +1,23 @@
+{
+	"name": "OnPremMSI",
+	"properties": {
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "\\\\MSI\\ToAzure",
+			"userId": "shareuser",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "MSI-password"
+			}
+		},
+		"connectVia": {
+			"referenceName": "OnPremSelHostedIR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
