@@ -1,0 +1,11 @@
+{
+	"name": "bottoblobstorage",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"serviceEndpoint": "https://bottoblobstorage.blob.core.windows.net",
+			"accountKind": "StorageV2"
+		}
+	}
+}
