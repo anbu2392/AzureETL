@@ -84,7 +84,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AzureSqlTable1",
+						"referenceName": "botdevldb_destination",
 						"type": "DatasetReference"
 					}
 				]
