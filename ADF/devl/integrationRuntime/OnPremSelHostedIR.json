@@ -1,0 +1,7 @@
+{
+	"name": "OnPremSelHostedIR",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "my self hosted IR"
+	}
+}
