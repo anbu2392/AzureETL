@@ -23,6 +23,10 @@
 			"type": "string",
 			"defaultValue": "shareuser"
 		},
+		"bottoblobstorage_properties_typeProperties_serviceEndpoint": {
+			"type": "string",
+			"defaultValue": "https://bottoblobstorage.blob.core.windows.net"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -55,6 +59,9 @@
 					},
 					"AKV_properties_typeProperties_baseUrl": {
 						"value": "[parameters('AKV_properties_typeProperties_baseUrl')]"
+					},
+					"bottoblobstorage_properties_typeProperties_serviceEndpoint": {
+						"value": "[parameters('bottoblobstorage_properties_typeProperties_serviceEndpoint')]"
 					},
 					"OnPremMSI_properties_typeProperties_host": {
 						"value": "[parameters('OnPremMSI_properties_typeProperties_host')]"

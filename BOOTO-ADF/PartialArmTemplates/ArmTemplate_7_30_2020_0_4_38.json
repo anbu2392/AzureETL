@@ -6,26 +6,6 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "BOOTO-ADF"
-		},
-		"botDevlDB_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'botDevlDB'"
-		},
-		"AKV_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://booto-keyvault.vault.azure.net/"
-		},
-		"OnPremMSI_properties_typeProperties_host": {
-			"type": "string",
-			"defaultValue": "\\\\MSI\\ToAzure"
-		},
-		"OnPremMSI_properties_typeProperties_userId": {
-			"type": "string",
-			"defaultValue": "shareuser"
-		},
-		"bottoblobstorage_properties_typeProperties_serviceEndpoint": {
-			"type": "string",
-			"defaultValue": "https://bottoblobstorage.blob.core.windows.net"
 		}
 	},
 	"variables": {
@@ -115,15 +95,13 @@
 						"inputs": [
 							{
 								"referenceName": "dataCsvFile",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						],
 						"outputs": [
 							{
 								"referenceName": "botdevldb_destination",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						]
 					}
@@ -134,7 +112,6 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/dataCsvFile')]",
 				"[concat(variables('factoryId'), '/datasets/botdevldb_destination')]"
 			]
 		},
@@ -168,115 +145,6 @@
 					"schema": "dbo",
 					"table": "destination"
 				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/botDevlDB')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataCsvFile')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "OnPremMSI",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"fileName": "data.csv"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "Id",
-						"type": "String"
-					},
-					{
-						"name": "Name",
-						"type": "String"
-					},
-					{
-						"name": "Address",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/OnPremMSI')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AKV')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('AKV_properties_typeProperties_baseUrl')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OnPremMSI')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('OnPremMSI_properties_typeProperties_host')]",
-					"userId": "[parameters('OnPremMSI_properties_typeProperties_userId')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "AKV",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "MSI-password"
-					}
-				},
-				"connectVia": {
-					"referenceName": "OnPremSelHostedIR",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/OnPremSelHostedIR')]",
-				"[concat(variables('factoryId'), '/linkedServices/AKV')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/botDevlDB')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "bot-Devel dB",
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('botDevlDB_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OnPremSelHostedIR')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "my self hosted IR",
-				"typeProperties": {}
 			},
 			"dependsOn": []
 		},
@@ -360,15 +228,13 @@
 						"inputs": [
 							{
 								"referenceName": "blobdatacsvfile",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						],
 						"outputs": [
 							{
 								"referenceName": "botdevldb_destination",
-								"type": "DatasetReference",
-								"parameters": {}
+								"type": "DatasetReference"
 							}
 						]
 					}
@@ -391,7 +257,7 @@
 				"annotations": [],
 				"type": "AzureBlobStorage",
 				"typeProperties": {
-					"serviceEndpoint": "[parameters('bottoblobstorage_properties_typeProperties_serviceEndpoint')]",
+					"serviceEndpoint": "https://bottoblobstorage.blob.core.windows.net",
 					"accountKind": "StorageV2"
 				}
 			},
