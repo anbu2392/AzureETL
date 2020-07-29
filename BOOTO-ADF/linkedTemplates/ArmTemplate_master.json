@@ -1,0 +1,70 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "BOOTO-ADF"
+		},
+		"botDevlDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'botDevlDB'"
+		},
+		"AKV_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://booto-keyvault.vault.azure.net/"
+		},
+		"OnPremMSI_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\MSI\\ToAzure"
+		},
+		"OnPremMSI_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "shareuser"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"botDevlDB_connectionString": {
+						"value": "[parameters('botDevlDB_connectionString')]"
+					},
+					"AKV_properties_typeProperties_baseUrl": {
+						"value": "[parameters('AKV_properties_typeProperties_baseUrl')]"
+					},
+					"OnPremMSI_properties_typeProperties_host": {
+						"value": "[parameters('OnPremMSI_properties_typeProperties_host')]"
+					},
+					"OnPremMSI_properties_typeProperties_userId": {
+						"value": "[parameters('OnPremMSI_properties_typeProperties_userId')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
