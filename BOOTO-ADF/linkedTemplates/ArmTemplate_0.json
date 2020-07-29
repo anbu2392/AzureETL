@@ -167,16 +167,20 @@
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
+					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
 				"schema": [
 					{
+						"name": "Id",
 						"type": "String"
 					},
 					{
+						"name": "Name",
 						"type": "String"
 					},
 					{
+						"name": "Address",
 						"type": "String"
 					}
 				]
@@ -263,8 +267,9 @@
 								"mappings": [
 									{
 										"source": {
-											"type": "Int16",
-											"ordinal": 1
+											"name": "Id",
+											"type": "Int32",
+											"physicalType": "String"
 										},
 										"sink": {
 											"name": "ID",
@@ -274,8 +279,9 @@
 									},
 									{
 										"source": {
+											"name": "Name",
 											"type": "String",
-											"ordinal": 2
+											"physicalType": "String"
 										},
 										"sink": {
 											"name": "Name",
@@ -285,8 +291,9 @@
 									},
 									{
 										"source": {
+											"name": "Address",
 											"type": "String",
-											"ordinal": 3
+											"physicalType": "String"
 										},
 										"sink": {
 											"name": "Address",
