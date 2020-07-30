@@ -1,0 +1,21 @@
+{
+	"name": "GetMetaData",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "OnPremMSI",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"folderPath": "New folder"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
