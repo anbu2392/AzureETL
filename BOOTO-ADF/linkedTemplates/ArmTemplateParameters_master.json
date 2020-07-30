@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "BOOTO-ADF"
 		},
+		"botDest_DB_connectionString": {
+			"value": ""
+		},
 		"botDevlDB_connectionString": {
 			"value": ""
 		},

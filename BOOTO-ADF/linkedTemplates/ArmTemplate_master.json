@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "BOOTO-ADF"
 		},
+		"botDest_DB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'botDest_DB'"
+		},
 		"botDevlDB_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'botDevlDB'"
@@ -54,6 +58,9 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"botDest_DB_connectionString": {
+						"value": "[parameters('botDest_DB_connectionString')]"
+					},
 					"botDevlDB_connectionString": {
 						"value": "[parameters('botDevlDB_connectionString')]"
 					},
@@ -72,6 +79,26 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ArmTemplate_0')]"
+			]
 		}
 	]
 }
