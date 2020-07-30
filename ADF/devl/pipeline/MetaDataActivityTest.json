@@ -133,7 +133,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"source": {
-									"type": "DelimitedTextSource",
+									"type": "BinarySource",
 									"storeSettings": {
 										"type": "FileServerReadSettings",
 										"recursive": true,
@@ -141,10 +141,10 @@
 											"value": "@item().name",
 											"type": "Expression"
 										},
-										"enablePartitionDiscovery": false
+										"deleteFilesAfterCompletion": false
 									},
 									"formatSettings": {
-										"type": "DelimitedTextReadSettings"
+										"type": "BinaryReadSettings"
 									}
 								},
 								"sink": {
@@ -157,7 +157,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "onPremNewFolderlist",
+									"referenceName": "logfilesfromOnpremise",
 									"type": "DatasetReference"
 								}
 							],
