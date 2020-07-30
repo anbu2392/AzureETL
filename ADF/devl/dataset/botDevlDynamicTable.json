@@ -10,7 +10,7 @@
 		"schema": [],
 		"typeProperties": {
 			"schema": "dbo",
-			"table": "@activity('Lookup1').output.Name"
+			"table": "@activity('Lookup1').output.Value.Name"
 		}
 	}
 }
