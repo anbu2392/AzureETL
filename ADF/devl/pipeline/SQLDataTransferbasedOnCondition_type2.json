@@ -29,7 +29,14 @@
 			{
 				"name": "CopyDatatoSQL",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "CheckEnabledColumn",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -41,11 +48,17 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select * from @activity('Lookup1').output.Name",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00"
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"tableOption": "autoCreate"
+						"preCopyScript": "truncate table dbo.Customer",
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
 					"translator": {
@@ -84,7 +97,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Lookup1').output.values",
+						"value": "@activity('Lookup1').output.value",
 						"type": "Expression"
 					},
 					"condition": {
