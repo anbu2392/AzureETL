@@ -7,10 +7,6 @@
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
-		"schema": [],
-		"typeProperties": {
-			"schema": "dbo",
-			"table": "@activity('Lookup1').output.value[0].name"
-		}
+		"schema": []
 	}
 }
