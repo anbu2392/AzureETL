@@ -1,5 +1,5 @@
 {
-	"name": "GetMetaData",
+	"name": "onPremNewFolderlist",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "OnPremMSI",
