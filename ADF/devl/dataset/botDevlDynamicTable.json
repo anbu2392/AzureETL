@@ -9,7 +9,7 @@
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "dbo.",
+			"schema": "dbo",
 			"table": "@activity('Lookup1').output.value[0].name"
 		}
 	}
