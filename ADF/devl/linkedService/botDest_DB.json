@@ -1,0 +1,19 @@
+{
+	"name": "botDest_DB",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=bot-servers.database.windows.net;Initial Catalog=bot-dest;User ID=etllogin",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AKV",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "bot-devl-etllogin-password"
+			}
+		}
+	}
+}
