@@ -1,0 +1,9 @@
+{
+	"name": "SQLDataTransferbasedOnCondition",
+	"properties": {
+		"folder": {
+			"name": "testActivities"
+		},
+		"annotations": []
+	}
+}
