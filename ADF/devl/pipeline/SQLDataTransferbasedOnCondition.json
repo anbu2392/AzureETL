@@ -21,7 +21,7 @@
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
-						"referenceName": "AzureSqlTable1",
+						"referenceName": "botDevlConfigTable",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
@@ -51,11 +51,29 @@
 						"type": "AzureSqlSource",
 						"queryTimeout": "02:00:00"
 					},
-					"enableStaging": false
+					"sink": {
+						"type": "AzureSqlSink",
+						"tableOption": "autoCreate"
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
 				},
 				"inputs": [
 					{
-						"referenceName": "AzureSqlTable1",
+						"referenceName": "botDevlDynamicTable",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "BotDestDB",
 						"type": "DatasetReference"
 					}
 				]
