@@ -226,10 +226,7 @@
 				"schema": [],
 				"typeProperties": {
 					"schema": "dbo",
-					"table": {
-						"value": "@activity('Lookup1').output.value[0].name",
-						"type": "Expression"
-					}
+					"table": "Customer"
 				}
 			},
 			"dependsOn": [
@@ -329,10 +326,7 @@
 				"schema": [],
 				"typeProperties": {
 					"schema": "dbo",
-					"table": {
-						"value": "@activity('Lookup1').output.value[0].name",
-						"type": "Expression"
-					}
+					"table": "@activity('Lookup1').output.Value[0].Name"
 				}
 			},
 			"dependsOn": [

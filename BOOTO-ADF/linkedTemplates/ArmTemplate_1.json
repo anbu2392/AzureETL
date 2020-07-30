@@ -213,7 +213,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/SQLDataTransferbasedOnCondition_')]",
+			"name": "[concat(parameters('factoryName'), '/SQLDataTransferbasedOnCondition_type2')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -233,7 +233,6 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
-								"sqlReaderQuery": "select * from dbo.Config where enabled=1",
 								"queryTimeout": "02:00:00"
 							},
 							"dataset": {
@@ -249,7 +248,7 @@
 						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "Lookup1",
+								"activity": "CheckEnabledColumn",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -270,7 +269,9 @@
 							},
 							"sink": {
 								"type": "AzureSqlSink",
-								"tableOption": "autoCreate"
+								"preCopyScript": "truncate table dbo.Customer",
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
 							},
 							"enableStaging": false,
 							"translator": {
@@ -296,6 +297,29 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "CheckEnabledColumn",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup1').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@equals(item().Enabled,1)",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"folder": {
