@@ -1,0 +1,19 @@
+{
+	"name": "BotDestDB",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "botDest_DB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": {
+				"value": "@activity('Lookup1').output.value[0].name",
+				"type": "Expression"
+			}
+		}
+	}
+}
