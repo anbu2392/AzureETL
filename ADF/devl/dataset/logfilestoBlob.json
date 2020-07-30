@@ -1,0 +1,17 @@
+{
+	"name": "logfilestoBlob",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "bottoblobstorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "output"
+			}
+		}
+	}
+}
