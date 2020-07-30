@@ -1,5 +1,5 @@
 {
-	"name": "botDevlConfigtable",
+	"name": "botDevlConfigTable",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "botDevlDB",
@@ -26,6 +26,10 @@
 				"type": "int",
 				"precision": 10
 			}
-		]
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Config"
+		}
 	}
 }
