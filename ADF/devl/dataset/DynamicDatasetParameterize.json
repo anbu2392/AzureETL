@@ -1,0 +1,23 @@
+{
+	"name": "DynamicDatasetParameterize",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DynamicLinkedService",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"LinkedServiceParam": {
+					"value": "@dataset().DataSetParameter",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"DataSetParameter": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	}
+}
