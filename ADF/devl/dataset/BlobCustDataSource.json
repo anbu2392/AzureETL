@@ -1,5 +1,5 @@
 {
-	"name": "SourceDataset_b4m",
+	"name": "BlobCustDataSource",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "bottoblobstorage",
