@@ -15,14 +15,32 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "BotdevlSalesData",
+						"referenceName": "BotDevlSalesData10",
 						"type": "DatasetReference"
 					},
 					"name": "TobotdevlDB"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					},
+					"name": "ToBotDevlsalesData20"
+				},
+				{
+					"dataset": {
+						"referenceName": "BotDevl_SalesDataOthers",
+						"type": "DatasetReference"
+					},
+					"name": "ToSalesDataOthers"
 				}
 			],
-			"transformations": [],
-			"script": "source(output(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as date,\n\t\tUnitPrice as float,\n\t\tCustomerID as integer,\n\t\tCountry as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> DataLakeSalesData\nDataLakeSalesData sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tInvoiceNo,\n\t\tStockCode,\n\t\tDescription,\n\t\tQuantity,\n\t\tInvoiceDate,\n\t\tUnitPrice,\n\t\tCustomerID,\n\t\tCountry\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> TobotdevlDB"
+			"transformations": [
+				{
+					"name": "SplitOnPrice"
+				}
+			],
+			"script": "source(output(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as date,\n\t\tUnitPrice as float,\n\t\tCustomerID as integer,\n\t\tCountry as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> DataLakeSalesData\nDataLakeSalesData split(UnitPrice<=10,\n\tUnitPrice>10 && UnitPrice<=20,\n\tdisjoint: false) ~> SplitOnPrice@(Stream10, Stream20, StreamOthers)\nSplitOnPrice@Stream10 sink(input(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as timestamp,\n\t\tUnitPrice as double,\n\t\tCustomerID as integer,\n\t\tCountry as string,\n\t\tCustomerName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> TobotdevlDB\nSplitOnPrice@Stream20 sink(input(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as timestamp,\n\t\tUnitPrice as double,\n\t\tCustomerID as integer,\n\t\tCountry as string,\n\t\tCustomerName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ToBotDevlsalesData20\nSplitOnPrice@StreamOthers sink(input(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as timestamp,\n\t\tUnitPrice as double,\n\t\tCustomerID as integer,\n\t\tCountry as string,\n\t\tCustomerName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ToSalesDataOthers"
 		}
 	}
 }
