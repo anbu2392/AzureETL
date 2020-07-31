@@ -9,13 +9,23 @@
 		"type": "AzureSqlTable",
 		"schema": [
 			{
-				"name": "CID",
+				"name": "id",
 				"type": "int",
 				"precision": 10
 			},
 			{
-				"name": "Name",
-				"type": "nvarchar"
+				"name": "Customer_Name",
+				"type": "varchar"
+			},
+			{
+				"name": "Salary",
+				"type": "float",
+				"precision": 15
+			},
+			{
+				"name": "Dept_ID",
+				"type": "int",
+				"precision": 10
 			}
 		],
 		"typeProperties": {
