@@ -1,0 +1,16 @@
+{
+	"name": "DestinationDataset_b4m",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "botDevlDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Customer_Data"
+		}
+	}
+}
