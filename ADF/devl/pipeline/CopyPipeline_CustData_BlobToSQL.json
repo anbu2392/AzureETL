@@ -1,5 +1,5 @@
 {
-	"name": "CopyPipeline_CustData",
+	"name": "CopyPipeline_CustData_BlobToSQL",
 	"properties": {
 		"activities": [
 			{
