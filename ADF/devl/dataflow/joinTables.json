@@ -1,0 +1,32 @@
+{
+	"name": "joinTables",
+	"properties": {
+		"description": "join Cust and Sales Table",
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_salesdatafromblob",
+						"type": "DatasetReference"
+					},
+					"name": "SalesData"
+				},
+				{
+					"dataset": {
+						"referenceName": "BlobCustDataSource",
+						"type": "DatasetReference"
+					},
+					"name": "CustData"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "JoinTables"
+				}
+			],
+			"script": "source(output(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as date,\n\t\tUnitPrice as float,\n\t\tCustomerID as integer,\n\t\tCountry as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> SalesData\nsource(output(\n\t\tCID as integer,\n\t\tName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> CustData\nSalesData, CustData join(CustomerID == CID,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> JoinTables"
+		}
+	}
+}
