@@ -82,7 +82,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DestinationDataset_b4m",
+						"referenceName": "BotDevl_CustomerData",
 						"type": "DatasetReference"
 					}
 				]
