@@ -76,7 +76,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "SourceDataset_b4m",
+						"referenceName": "BlobCustDataSource",
 						"type": "DatasetReference"
 					}
 				],

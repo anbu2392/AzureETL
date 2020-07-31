@@ -29,7 +29,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "AzureSqlTable1",
+						"referenceName": "DS_BOTDevlDBSalesData20",
 						"type": "DatasetReference"
 					},
 					"name": "ToBotDevlsalesData20"
