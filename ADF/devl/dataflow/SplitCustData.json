@@ -19,13 +19,34 @@
 					"name": "DeptData"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_BOTDestHRTable",
+						"type": "DatasetReference"
+					},
+					"name": "toHRTable"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_BOTDestFinanceTable",
+						"type": "DatasetReference"
+					},
+					"name": "ToFinanceTable"
+				}
+			],
 			"transformations": [
 				{
 					"name": "Join1"
+				},
+				{
+					"name": "SplitBasedOnDept"
+				},
+				{
+					"name": "ChangeDepidColName"
 				}
 			],
-			"script": "source(output(\n\t\tid as integer,\n\t\tCustomer_Name as string,\n\t\tSalary as double,\n\t\tDept_ID as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> CustData\nsource(output(\n\t\tid as integer,\n\t\tDept_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> DeptData\nCustData, DeptData join(Dept_ID == DeptData@id,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1"
+			"script": "source(output(\n\t\tid as integer,\n\t\tCustomer_Name as string,\n\t\tSalary as double,\n\t\tDept_ID as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> CustData\nsource(output(\n\t\tid as integer,\n\t\tDept_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> DeptData\nCustData, DeptData join(Dept_ID == DeptData@id,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nChangeDepidColName split(equals(Dept_Name,'HR'),\n\tequals(Dept_Name, 'Finance'),\n\tdisjoint: false) ~> SplitBasedOnDept@(HRTable, FinanceTable, FinanceTable)\nJoin1 select(mapColumn(\n\t\tCust_ID = CustData@id,\n\t\tCustomer_Name,\n\t\tSalary,\n\t\tDept_ID,\n\t\tDept_Name\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeDepidColName\nSplitBasedOnDept@HRTable sink(input(\n\t\tCust_ID as integer,\n\t\tCust_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tCust_ID,\n\t\tCust_Name = Customer_Name\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> toHRTable\nSplitBasedOnDept@FinanceTable sink(input(\n\t\tCust_ID as integer,\n\t\tCust_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ToFinanceTable"
 		}
 	}
 }

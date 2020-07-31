@@ -1,0 +1,26 @@
+{
+	"name": "DS_BOTDestFinanceTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "botDest_DB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Cust_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Cust_Name",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Finance"
+		}
+	}
+}
