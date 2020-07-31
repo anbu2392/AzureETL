@@ -1,5 +1,5 @@
 {
-	"name": "DestinationDataset_b4m",
+	"name": "BotDevl_CustomerData",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "botDevlDB",
