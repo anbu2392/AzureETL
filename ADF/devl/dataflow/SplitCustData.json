@@ -1,0 +1,31 @@
+{
+	"name": "SplitCustData",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_BotDevlCustData",
+						"type": "DatasetReference"
+					},
+					"name": "CustData"
+				},
+				{
+					"dataset": {
+						"referenceName": "DS_BotDevl_DeptData",
+						"type": "DatasetReference"
+					},
+					"name": "DeptData"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "Join1"
+				}
+			],
+			"script": "source(output(\n\t\tid as integer,\n\t\tCustomer_Name as string,\n\t\tSalary as double,\n\t\tDept_ID as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> CustData\nsource(output(\n\t\tid as integer,\n\t\tDept_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> DeptData\nCustData, DeptData join(Dept_ID == DeptData@id,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1"
+		}
+	}
+}

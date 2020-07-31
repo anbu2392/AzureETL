@@ -1,0 +1,26 @@
+{
+	"name": "DS_BotDevl_DeptData",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "botDevlDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Dept_Name",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Department"
+		}
+	}
+}
