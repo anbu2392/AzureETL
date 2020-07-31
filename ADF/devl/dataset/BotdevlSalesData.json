@@ -7,7 +7,44 @@
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
-		"schema": [],
+		"schema": [
+			{
+				"name": "InvoiceNo",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "StockCode",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Description",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Quantity",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "InvoiceDate",
+				"type": "date"
+			},
+			{
+				"name": "UnitPrice",
+				"type": "real",
+				"precision": 7
+			},
+			{
+				"name": "CustomerID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Country",
+				"type": "nvarchar"
+			}
+		],
 		"typeProperties": {
 			"schema": "dbo",
 			"table": "SalesData"
