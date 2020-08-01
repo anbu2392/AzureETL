@@ -64,9 +64,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('LookupConfigTable').output",
+						"value": "@activity('FilterOnlyCRM').output.value",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "IncredmentalLoadCheck",
