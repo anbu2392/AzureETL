@@ -103,6 +103,10 @@
 											},
 											"sink": {
 												"type": "AzureSqlSink",
+												"preCopyScript": {
+													"value": "@{concat('truncate table dbo.',item().Table_Name)}",
+													"type": "Expression"
+												},
 												"disableMetricsCollection": false
 											},
 											"enableStaging": false,
@@ -154,7 +158,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "select max(Last_Updated_Date) as MaxD from @{item().Table_Name} ",
+													"value": "select max(Last_Updated_Time) as MaxD from @{item().Table_Name} ",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00"
