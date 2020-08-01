@@ -103,7 +103,6 @@
 											},
 											"sink": {
 												"type": "AzureSqlSink",
-												"preCopyScript": "truncate table @{item().Table_Name}",
 												"disableMetricsCollection": false
 											},
 											"enableStaging": false,
