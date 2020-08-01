@@ -1,5 +1,5 @@
 {
-	"name": "BotDestDynamicTable",
+	"name": "BotDestStgDynamicTable",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "botDest_DB",
