@@ -184,7 +184,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "update stg.Config set MAX_LastUpdatedDate = '@{activity('GetMaxDatefromSourceTable').output.firstRow.MaxD}'\nwhere table_name like '@{item().Table_Name}'",
+													"value": "update stg.Config set MAX_LastUpdatedDate = '@{activity('GetMaxDatefromSourceTable').output.firstRow.MaxD}'\nwhere table_name like '@{item().Table_Name}'\nselect '1'",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00"
