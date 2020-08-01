@@ -95,7 +95,10 @@
 										"typeProperties": {
 											"source": {
 												"type": "AzureSqlSource",
-												"sqlReaderQuery": "select * from @{item().Table_Name}",
+												"sqlReaderQuery": {
+													"value": "select * from @{item().Table_Name}",
+													"type": "Expression"
+												},
 												"queryTimeout": "02:00:00"
 											},
 											"sink": {
