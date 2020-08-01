@@ -81,8 +81,42 @@
 								},
 								"ifTrueActivities": [
 									{
-										"name": "GetMaxLastUpdateDate",
+										"name": "GetMaxDatefromSourceTable",
 										"type": "Lookup",
+										"dependsOn": [
+											{
+												"activity": "Copy data1",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "select max(Last_Updated_Date) as MaxD from @{item().Table_Name} ",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00"
+											},
+											"dataset": {
+												"referenceName": "DS_BotDevl_dynamicTable",
+												"type": "DatasetReference"
+											}
+										}
+									},
+									{
+										"name": "Copy data1",
+										"type": "Copy",
 										"dependsOn": [],
 										"policy": {
 											"timeout": "7.00:00:00",
@@ -95,32 +129,69 @@
 										"typeProperties": {
 											"source": {
 												"type": "AzureSqlSource",
-												"sqlReaderQuery": "select Max_LastUpdatedDate  from stg.Config where Table_Name like '@{item().Table_Name}'",
+												"sqlReaderQuery": "select * from @{item().Table_Name} where Last_Updated_Date > convert(datetime,'@{item().Max_LastUpdatedDate}')",
 												"queryTimeout": "02:00:00"
 											},
-											"dataset": {
-												"referenceName": "BotDestStgConfigTable",
+											"sink": {
+												"type": "AzureSqlSink"
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_BotDevl_dynamicTable",
 												"type": "DatasetReference"
 											}
-										}
+										],
+										"outputs": [
+											{
+												"referenceName": "BotDestStgDynamicTable",
+												"type": "DatasetReference",
+												"parameters": {
+													"DatasetTable_Name": "@{item().Table_Name}"
+												}
+											}
+										]
 									},
 									{
-										"name": "Set variable1",
-										"type": "SetVariable",
+										"name": "SetMaxDateinConfig",
+										"type": "Lookup",
 										"dependsOn": [
 											{
-												"activity": "GetMaxLastUpdateDate",
+												"activity": "GetMaxDatefromSourceTable",
 												"dependencyConditions": [
 													"Succeeded"
 												]
 											}
 										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
 										"userProperties": [],
 										"typeProperties": {
-											"variableName": "Lookup output1",
-											"value": {
-												"value": "@activity('GetMaxLastUpdateDate').output",
-												"type": "Expression"
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "update stg.Config set MAX_LastUpdatedDate = '@{activity('GetMaxDatefromSourceTable').output.firstRow.MaxD}'\nwhere table_name like '@{item().Table_Name}'",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00"
+											},
+											"dataset": {
+												"referenceName": "BotDestStgConfigTable",
+												"type": "DatasetReference"
 											}
 										}
 									}
