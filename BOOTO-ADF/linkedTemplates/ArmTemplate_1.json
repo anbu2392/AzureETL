@@ -13,6 +13,204 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_BotDevlCustData')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "botDevlDB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Customer_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Salary",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Dept_ID",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Customer"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_BotDevl_DeptData')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "botDevlDB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Dept_Name",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Department"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OnPremMultiplefiles')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPremMSI",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Id",
+						"type": "String"
+					},
+					{
+						"name": "Name",
+						"type": "String"
+					},
+					{
+						"name": "City",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/botDevlConfigTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "botDevlDB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Type",
+						"type": "varchar"
+					},
+					{
+						"name": "Enabled",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Config"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/botDevlDynamicTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "botDevlDB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@activity('Lookup1').output.Value[0].Name",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/botdevlDB_DboCopyData')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "botDevlDB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Name",
+						"type": "varchar"
+					},
+					{
+						"name": "City",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "CopyDemo"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/botdevldb_destination')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -128,75 +326,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_BotDevlCustData')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "botDevlDB",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "id",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "Customer_Name",
-						"type": "varchar"
-					},
-					{
-						"name": "Salary",
-						"type": "float",
-						"precision": 15
-					},
-					{
-						"name": "Dept_ID",
-						"type": "int",
-						"precision": 10
-					}
-				],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": "Customer"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_BotDevl_DeptData')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "botDevlDB",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "id",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "Dept_Name",
-						"type": "varchar"
-					}
-				],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": "Department"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_BOTDestHRTable')]",
+			"name": "[concat(parameters('factoryName'), '/BotDestStgConfigTable')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -208,24 +338,55 @@
 				"type": "AzureSqlTable",
 				"schema": [
 					{
-						"name": "Cust_ID",
+						"name": "Table_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Source",
+						"type": "varchar"
+					},
+					{
+						"name": "Max_LastUpdatedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Enabled",
 						"type": "int",
 						"precision": 10
 					},
 					{
-						"name": "Cust_Name",
-						"type": "varchar"
+						"name": "Incremental_Full_Load",
+						"type": "int",
+						"precision": 10
 					}
 				],
 				"typeProperties": {
-					"schema": "dbo",
-					"table": "HR"
+					"schema": "stg",
+					"table": "Config"
 				}
 			},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_BOTDestFinanceTable')]",
+			"name": "[concat(parameters('factoryName'), '/DS_BotDevl_dynamicTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "botDevlDB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BotDestStgDynamicTable')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -233,22 +394,20 @@
 					"referenceName": "botDest_DB",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"DatasetTable_Name": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "Cust_ID",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "Cust_Name",
-						"type": "varchar"
-					}
-				],
+				"schema": [],
 				"typeProperties": {
-					"schema": "dbo",
-					"table": "Finance"
+					"schema": "stg",
+					"table": {
+						"value": "@dataset().DatasetTable_Name",
+						"type": "Expression"
+					}
 				}
 			},
 			"dependsOn": []
@@ -588,7 +747,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/CopyPipeline_CustData')]",
+			"name": "[concat(parameters('factoryName'), '/CopyPipeline_CustData_BlobToSQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -882,7 +1041,10 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/botDevlConfigTable')]",
+				"[concat(variables('factoryId'), '/datasets/botDevlDynamicTable')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/SQLDataTransferbasedOnCondition_type2')]",
@@ -999,7 +1161,10 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/botDevlConfigTable')]",
+				"[concat(variables('factoryId'), '/datasets/botDevlDynamicTable')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/mulipleonpremToSQL')]",
@@ -1106,271 +1271,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SalesDataCopy')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_salesdatafromblob",
-								"type": "DatasetReference"
-							},
-							"name": "DataLakeSalesData"
-						},
-						{
-							"dataset": {
-								"referenceName": "BotDevl_CustomerData",
-								"type": "DatasetReference"
-							},
-							"name": "ReferenceStreamCustomerData"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "BotDevlSalesData10",
-								"type": "DatasetReference"
-							},
-							"name": "TobotdevlDB"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_BOTDevlDBSalesData20",
-								"type": "DatasetReference"
-							},
-							"name": "ToBotDevlsalesData20"
-						},
-						{
-							"dataset": {
-								"referenceName": "BotDevl_SalesDataOthers",
-								"type": "DatasetReference"
-							},
-							"name": "ToSalesDataOthers"
-						}
-					],
-					"transformations": [
-						{
-							"name": "SplitOnPrice"
-						},
-						{
-							"name": "DerivedColumn1"
-						},
-						{
-							"name": "LookupCustData"
-						},
-						{
-							"name": "Select1"
-						},
-						{
-							"name": "FilterQuantitymorethan4"
-						}
-					],
-					"script": "source(output(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as string,\n\t\tUnitPrice as float,\n\t\tCustomerID as integer,\n\t\tCountry as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> DataLakeSalesData\nsource(output(\n\t\tCID as integer,\n\t\tName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ReferenceStreamCustomerData\nDerivedColumn1 split(UnitPrice<=10,\n\tUnitPrice>10 && UnitPrice<=20,\n\tdisjoint: false) ~> SplitOnPrice@(Stream10, Stream20, StreamOthers)\nSelect1 derive(CustomerName = Name,\n\t\tInvoiceDate = toTimestamp(InvoiceDate,'MM-DD-YYYY HH:mm')) ~> DerivedColumn1\nDataLakeSalesData, ReferenceStreamCustomerData lookup(CustomerID == CID,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupCustData\nFilterQuantitymorethan4 select(mapColumn(\n\t\tInvoiceNo,\n\t\tStockCode,\n\t\tDescription,\n\t\tQuantity,\n\t\tInvoiceDate,\n\t\tUnitPrice,\n\t\tCustomerID,\n\t\tCountry,\n\t\tName\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nLookupCustData filter(Quantity>4) ~> FilterQuantitymorethan4\nSplitOnPrice@Stream10 sink(input(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as timestamp,\n\t\tUnitPrice as double,\n\t\tCustomerID as integer,\n\t\tCountry as string,\n\t\tCustomerName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> TobotdevlDB\nSplitOnPrice@Stream20 sink(input(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as timestamp,\n\t\tUnitPrice as double,\n\t\tCustomerID as integer,\n\t\tCountry as string,\n\t\tCustomerName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ToBotDevlsalesData20\nSplitOnPrice@StreamOthers sink(input(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as timestamp,\n\t\tUnitPrice as double,\n\t\tCustomerID as integer,\n\t\tCountry as string,\n\t\tCustomerName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\trecreate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ToSalesDataOthers"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/joinTables')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "join Cust and Sales Table",
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_salesdatafromblob",
-								"type": "DatasetReference"
-							},
-							"name": "SalesData"
-						},
-						{
-							"dataset": {
-								"referenceName": "BlobCustDataSource",
-								"type": "DatasetReference"
-							},
-							"name": "CustData"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "BotdevlSalesData",
-								"type": "DatasetReference"
-							},
-							"name": "SQLTable"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Exists1"
-						}
-					],
-					"script": "source(output(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as date,\n\t\tUnitPrice as float,\n\t\tCustomerID as integer,\n\t\tCountry as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> SalesData\nsource(output(\n\t\tCID as integer,\n\t\tName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> CustData\nSalesData, CustData exists(CustomerID == CID,\n\tnegate:true,\n\tbroadcast: 'auto')~> Exists1\nExists1 sink(input(\n\t\tInvoiceNo as integer,\n\t\tStockCode as string,\n\t\tDescription as string,\n\t\tQuantity as integer,\n\t\tInvoiceDate as date,\n\t\tUnitPrice as float,\n\t\tCustomerID as integer,\n\t\tCountry as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tpreSQLs:['truncate table dbo.SalesData'],\n\tmapColumn(\n\t\tInvoiceNo,\n\t\tStockCode,\n\t\tDescription,\n\t\tQuantity,\n\t\tInvoiceDate,\n\t\tUnitPrice,\n\t\tCustomerID,\n\t\tCountry\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SQLTable"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SplitCustData')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "DS_BotDevlCustData",
-								"type": "DatasetReference"
-							},
-							"name": "CustData"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_BotDevl_DeptData",
-								"type": "DatasetReference"
-							},
-							"name": "DeptData"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "DS_BOTDestHRTable",
-								"type": "DatasetReference"
-							},
-							"name": "toHRTable"
-						},
-						{
-							"dataset": {
-								"referenceName": "DS_BOTDestFinanceTable",
-								"type": "DatasetReference"
-							},
-							"name": "ToFinanceTable"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Join1"
-						},
-						{
-							"name": "SplitBasedOnDept"
-						},
-						{
-							"name": "ChangeDepidColName"
-						}
-					],
-					"script": "source(output(\n\t\tid as integer,\n\t\tCustomer_Name as string,\n\t\tSalary as double,\n\t\tDept_ID as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> CustData\nsource(output(\n\t\tid as integer,\n\t\tDept_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> DeptData\nCustData, DeptData join(Dept_ID == DeptData@id,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nChangeDepidColName split(equals(Dept_Name,'HR'),\n\tequals(Dept_Name, 'Finance'),\n\tdisjoint: false) ~> SplitBasedOnDept@(HRTable, FinanceTable)\nJoin1 select(mapColumn(\n\t\tCust_ID = CustData@id,\n\t\tCustomer_Name,\n\t\tSalary,\n\t\tDept_ID,\n\t\tDept_Name\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ChangeDepidColName\nSplitBasedOnDept@HRTable sink(input(\n\t\tCust_ID as integer,\n\t\tCust_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tCust_ID,\n\t\tCust_Name = Customer_Name\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> toHRTable\nSplitBasedOnDept@FinanceTable sink(input(\n\t\tCust_ID as integer,\n\t\tCust_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> ToFinanceTable"
-				}
-			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_BotDevlCustData')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BotDevl_DeptData')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BOTDestHRTable')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BOTDestFinanceTable')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DF1')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "dataflow1",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "SalesDataCopy",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"DataLakeSalesData": {},
-									"ReferenceStreamCustomerData": {},
-									"TobotdevlDB": {},
-									"ToBotDevlsalesData20": {},
-									"ToSalesDataOthers": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							}
-						}
-					}
-				],
-				"folder": {
-					"name": "DataFlows"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/SalesDataCopy')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/JoinCustandSales')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "dataflow1",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "joinTables",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"SalesData": {},
-									"CustData": {},
-									"SQLTable": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							}
-						}
-					}
-				],
-				"folder": {
-					"name": "DataFlows"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/joinTables')]"
+				"[concat(variables('factoryId'), '/datasets/OnPremMultiplefiles')]",
+				"[concat(variables('factoryId'), '/datasets/botdevlDB_DboCopyData')]"
 			]
 		}
 	]

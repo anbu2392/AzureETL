@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "BOOTO-ADF"
 		},
+		"DynamicLinkedService_connectionString": {
+			"value": ""
+		},
 		"botDest_DB_connectionString": {
 			"value": ""
 		},

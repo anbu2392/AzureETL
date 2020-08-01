@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "BOOTO-ADF"
 		},
+		"DynamicLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'DynamicLinkedService'"
+		},
 		"botDest_DB_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'botDest_DB'"
@@ -57,6 +61,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"DynamicLinkedService_connectionString": {
+						"value": "[parameters('DynamicLinkedService_connectionString')]"
 					},
 					"botDest_DB_connectionString": {
 						"value": "[parameters('botDest_DB_connectionString')]"
