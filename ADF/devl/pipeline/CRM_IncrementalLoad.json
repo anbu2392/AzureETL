@@ -130,7 +130,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "@select * from item().Table_Name \nwhere LAST_UPDATED_DATE > (activity('GetMaxUpdatedColumnfromConfig').output.firstrow.Max_LastUpdatedDate)",
+													"value": "@select * from @{item().Table_Name}\nwhere LAST_UPDATED_DATE > @(activity('GetMaxUpdatedColumnfromConfig').output.firstRow.Max_LastUpdateDate)",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00"
@@ -160,49 +160,12 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"DatasetTable_Name": {
-														"value": "item().Table_Name",
+														"value": "@{item().Table_Name}",
 														"type": "Expression"
 													}
 												}
 											}
 										]
-									},
-									{
-										"name": "Lookup1",
-										"type": "Lookup",
-										"dependsOn": [
-											{
-												"activity": "CopyDataToStaging",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"source": {
-												"type": "AzureSqlSource",
-												"sqlReaderQuery": "select max(Last_Updated_Date) from item().Table_Name;",
-												"queryTimeout": "02:00:00"
-											},
-											"dataset": {
-												"referenceName": "BotDestDynamicTable",
-												"type": "DatasetReference",
-												"parameters": {
-													"DatasetTable_Name": {
-														"value": "@(Item().TableName)",
-														"type": "Expression"
-													}
-												}
-											}
-										}
 									}
 								]
 							}
