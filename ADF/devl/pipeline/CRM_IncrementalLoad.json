@@ -67,7 +67,18 @@
 						"value": "@activity('FilterOnlyCRM').output.value",
 						"type": "Expression"
 					},
-					"isSequential": false
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Wait1",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					]
 				}
 			}
 		],
