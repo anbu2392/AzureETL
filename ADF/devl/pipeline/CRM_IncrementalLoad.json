@@ -1,0 +1,216 @@
+{
+	"name": "CRM_IncrementalLoad",
+	"properties": {
+		"activities": [
+			{
+				"name": "LookupConfigTable",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select * from stg.Config where Enabled=1;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "BotDestStgConfigTable",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FilterOnlyCRM",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "LookupConfigTable",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupConfigTable').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@equals(Item().Source,'CRM')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ForEachEnabledTable",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "FilterOnlyCRM",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('FilterOnlyCRM').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "IncredmentalLoadCheck",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(item().Incremental_Full_Load,1)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "GetMaxUpdatedColumnfromConfig",
+										"type": "Lookup",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "select Max_LastUpdatedDate from stg.Config where Table_Name like '@(item().Table_Name)'",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00"
+											},
+											"dataset": {
+												"referenceName": "BotDestStgConfigTable",
+												"type": "DatasetReference"
+											},
+											"firstRowOnly": false
+										}
+									},
+									{
+										"name": "CopyDataToStaging",
+										"type": "Copy",
+										"dependsOn": [
+											{
+												"activity": "GetMaxUpdatedColumnfromConfig",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "@select * from item().Table_Name \nwhere LAST_UPDATED_DATE > (activity('GetMaxUpdatedColumnfromConfig').output.firstrow.Max_LastUpdatedDate)",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00"
+											},
+											"sink": {
+												"type": "AzureSqlSink"
+											},
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
+										},
+										"inputs": [
+											{
+												"referenceName": "DS_BotDevl_dynamicTable",
+												"type": "DatasetReference"
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "BotDestDynamicTable",
+												"type": "DatasetReference",
+												"parameters": {
+													"DatasetTable_Name": {
+														"value": "item().Table_Name",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									},
+									{
+										"name": "Lookup1",
+										"type": "Lookup",
+										"dependsOn": [
+											{
+												"activity": "CopyDataToStaging",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": "select max(Last_Updated_Date) from item().Table_Name;",
+												"queryTimeout": "02:00:00"
+											},
+											"dataset": {
+												"referenceName": "BotDestDynamicTable",
+												"type": "DatasetReference",
+												"parameters": {
+													"DatasetTable_Name": {
+														"value": "@(Item().TableName)",
+														"type": "Expression"
+													}
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": []
+	}
+}

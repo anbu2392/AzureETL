@@ -1,0 +1,12 @@
+{
+	"name": "DS_BotDevl_dynamicTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "botDevlDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	}
+}
