@@ -70,18 +70,38 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "Wait1",
-							"type": "Wait",
+							"name": "CheckincrementalLoad",
+							"type": "IfCondition",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"waitTimeInSeconds": 1
+								"expression": {
+									"value": "@equals(item().Incremental_Full_Load,1)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Set variable1",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "myvar",
+											"value": "@item()"
+										}
+									}
+								]
 							}
 						}
 					]
 				}
 			}
 		],
+		"variables": {
+			"myvar": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
