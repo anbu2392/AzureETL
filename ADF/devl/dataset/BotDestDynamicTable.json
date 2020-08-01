@@ -5,12 +5,20 @@
 			"referenceName": "botDest_DB",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"DatasetTable_Name": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
 			"schema": "stg",
-			"table": "item().Table_Name"
+			"table": {
+				"value": "@dataset().DatasetTable_Name",
+				"type": "Expression"
+			}
 		}
 	}
 }
