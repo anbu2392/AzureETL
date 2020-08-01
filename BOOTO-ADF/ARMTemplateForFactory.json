@@ -2342,12 +2342,18 @@
 												"typeProperties": {
 													"source": {
 														"type": "AzureSqlSource",
-														"sqlReaderQuery": "select * from @{item().Table_Name}",
+														"sqlReaderQuery": {
+															"value": "select * from @{item().Table_Name}",
+															"type": "Expression"
+														},
 														"queryTimeout": "02:00:00"
 													},
 													"sink": {
 														"type": "AzureSqlSink",
-														"preCopyScript": "truncate table @{item().Table_Name}",
+														"preCopyScript": {
+															"value": "@{concat('truncate table dbo.',item().Table_Name)}",
+															"type": "Expression"
+														},
 														"disableMetricsCollection": false
 													},
 													"enableStaging": false,
@@ -2400,7 +2406,7 @@
 													"source": {
 														"type": "AzureSqlSource",
 														"sqlReaderQuery": {
-															"value": "select max(Last_Updated_Date) as MaxD from @{item().Table_Name} ",
+															"value": "select max(Last_Updated_Time) as MaxD from @{item().Table_Name} ",
 															"type": "Expression"
 														},
 														"queryTimeout": "02:00:00"
