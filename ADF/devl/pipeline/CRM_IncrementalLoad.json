@@ -81,13 +81,47 @@
 								},
 								"ifTrueActivities": [
 									{
-										"name": "Set variable1",
-										"type": "SetVariable",
+										"name": "GetMaxLastUpdateDate",
+										"type": "Lookup",
 										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
 										"userProperties": [],
 										"typeProperties": {
-											"variableName": "myvar",
-											"value": "@item()"
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": "select Max_LastUpdatedDate  from stg.Config where Table_Name like '@{item().Table_Name}'",
+												"queryTimeout": "02:00:00"
+											},
+											"dataset": {
+												"referenceName": "BotDestStgConfigTable",
+												"type": "DatasetReference"
+											}
+										}
+									},
+									{
+										"name": "Set variable1",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "GetMaxLastUpdateDate",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "Lookup output1",
+											"value": {
+												"value": "@activity('GetMaxLastUpdateDate').output",
+												"type": "Expression"
+											}
 										}
 									}
 								]
@@ -98,7 +132,13 @@
 			}
 		],
 		"variables": {
-			"myvar": {
+			"Item": {
+				"type": "Array"
+			},
+			"Lookup output1": {
+				"type": "Array"
+			},
+			"Lookup Output2": {
 				"type": "String"
 			}
 		},
