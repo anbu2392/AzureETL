@@ -64,7 +64,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('FilterOnlyCRM').output.value",
+						"value": "@activity('LookupConfigTable').output",
 						"type": "Expression"
 					},
 					"activities": [
@@ -130,7 +130,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "@select * from @{item().Table_Name}\nwhere LAST_UPDATED_DATE > @(activity('GetMaxUpdatedColumnfromConfig').output.firstRow.Max_LastUpdateDate)",
+													"value": "select * from @{item().Table_Name}\nwhere LAST_UPDATED_DATE > @(activity('GetMaxUpdatedColumnfromConfig').output.firstRow.Max_LastUpdateDate)",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00"
