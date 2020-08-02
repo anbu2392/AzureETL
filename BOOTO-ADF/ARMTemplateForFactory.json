@@ -149,6 +149,366 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/CRM_IncrementalLoad')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupConfigTable",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "select * from stg.Config where Enabled=1;",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "BotDestStgConfigTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "FilterOnlyCRM",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "LookupConfigTable",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupConfigTable').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@equals(Item().Source,'CRM')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ForEachEnabledTable",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "FilterOnlyCRM",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('FilterOnlyCRM').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "CheckincrementalLoad",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(item().Incremental_Full_Load,1)",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "CopyDataFull",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "select * from @{item().Table_Name}",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00"
+													},
+													"sink": {
+														"type": "AzureSqlSink",
+														"preCopyScript": {
+															"value": "@{concat('truncate table dbo.',item().Table_Name)}",
+															"type": "Expression"
+														},
+														"disableMetricsCollection": false
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_BotDevl_dynamicTable",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "BotDestStgDynamicTable",
+														"type": "DatasetReference",
+														"parameters": {
+															"DatasetTable_Name": "@{item().Table_Name}"
+														}
+													}
+												]
+											},
+											{
+												"name": "GetMaxDatefromSourceTable_copy1",
+												"type": "Lookup",
+												"dependsOn": [
+													{
+														"activity": "CopyDataFull",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "select max(Last_Updated_Time) as MaxD from @{item().Table_Name} ",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00"
+													},
+													"dataset": {
+														"referenceName": "DS_BotDevl_dynamicTable",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												}
+											},
+											{
+												"name": "SetMaxDateinConfig_copy1",
+												"type": "Lookup",
+												"dependsOn": [
+													{
+														"activity": "GetMaxDatefromSourceTable_copy1",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "update stg.Config set MAX_LastUpdatedDate = '@{activity('GetMaxDatefromSourceTable_copy1').output.firstRow.MaxD}'\nwhere table_name like '@{item().Table_Name}'\n\nselect '1'",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00"
+													},
+													"dataset": {
+														"referenceName": "BotDestStgConfigTable",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												}
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "GetMaxDatefromSourceTable",
+												"type": "Lookup",
+												"dependsOn": [
+													{
+														"activity": "Copy data1",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "select max(Last_Updated_Date) as MaxD from @{item().Table_Name} ",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00"
+													},
+													"dataset": {
+														"referenceName": "DS_BotDevl_dynamicTable",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												}
+											},
+											{
+												"name": "Copy data1",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "select * from @{item().Table_Name} where Last_Updated_Date > convert(datetime,'@{item().Max_LastUpdatedDate}')",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00"
+													},
+													"sink": {
+														"type": "AzureSqlSink"
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_BotDevl_dynamicTable",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "BotDestStgDynamicTable",
+														"type": "DatasetReference",
+														"parameters": {
+															"DatasetTable_Name": "@{item().Table_Name}"
+														}
+													}
+												]
+											},
+											{
+												"name": "SetMaxDateinConfig",
+												"type": "Lookup",
+												"dependsOn": [
+													{
+														"activity": "GetMaxDatefromSourceTable",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "update stg.Config set MAX_LastUpdatedDate = '@{activity('GetMaxDatefromSourceTable').output.firstRow.MaxD}' where table_name like '@{item().Table_Name}'\n\nselect '1'",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00"
+													},
+													"dataset": {
+														"referenceName": "BotDestStgConfigTable",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"variables": {
+					"Item": {
+						"type": "Array"
+					},
+					"Lookup output1": {
+						"type": "Array"
+					},
+					"Lookup Output2": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/BotDestStgConfigTable')]",
+				"[concat(variables('factoryId'), '/datasets/DS_BotDevl_dynamicTable')]",
+				"[concat(variables('factoryId'), '/datasets/BotDestStgDynamicTable')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ConditionalDataTransfer')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1111,6 +1471,81 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/BotDestStgConfigTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "botDest_DB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Table_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "Source",
+						"type": "varchar"
+					},
+					{
+						"name": "Max_LastUpdatedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Enabled",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Incremental_Full_Load",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "stg",
+					"table": "Config"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/botDest_DB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BotDestStgDynamicTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "botDest_DB",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"DatasetTable_Name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "stg",
+					"table": {
+						"value": "@dataset().DatasetTable_Name",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/botDest_DB')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/BotDevlSalesData10')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1510,6 +1945,24 @@
 					"schema": "dbo",
 					"table": "Department"
 				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/botDevlDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_BotDevl_dynamicTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "botDevlDB",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/botDevlDB')]"
@@ -2243,14 +2696,14 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/CRM_IncrementalLoad')]",
+			"name": "[concat(parameters('factoryName'), '/SCD Type 2')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "LookupConfigTable",
-						"type": "Lookup",
+						"name": "dataflow1",
+						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "7.00:00:00",
@@ -2261,346 +2714,100 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "select * from stg.Config where Enabled=1;",
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "BotDestStgConfigTable",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "FilterOnlyCRM",
-						"type": "Filter",
-						"dependsOn": [
-							{
-								"activity": "LookupConfigTable",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('LookupConfigTable').output.value",
-								"type": "Expression"
-							},
-							"condition": {
-								"value": "@equals(Item().Source,'CRM')",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "ForEachEnabledTable",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "FilterOnlyCRM",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('FilterOnlyCRM').output.value",
-								"type": "Expression"
-							},
-							"isSequential": false,
-							"activities": [
-								{
-									"name": "CheckincrementalLoad",
-									"type": "IfCondition",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@equals(item().Incremental_Full_Load,1)",
-											"type": "Expression"
-										},
-										"ifFalseActivities": [
-											{
-												"name": "CopyDataFull",
-												"type": "Copy",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "select * from @{item().Table_Name}",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00"
-													},
-													"sink": {
-														"type": "AzureSqlSink",
-														"preCopyScript": {
-															"value": "@{concat('truncate table dbo.',item().Table_Name)}",
-															"type": "Expression"
-														},
-														"disableMetricsCollection": false
-													},
-													"enableStaging": false,
-													"translator": {
-														"type": "TabularTranslator",
-														"typeConversion": true,
-														"typeConversionSettings": {
-															"allowDataTruncation": true,
-															"treatBooleanAsNumber": false
-														}
-													}
-												},
-												"inputs": [
-													{
-														"referenceName": "DS_BotDevl_dynamicTable",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "BotDestStgDynamicTable",
-														"type": "DatasetReference",
-														"parameters": {
-															"DatasetTable_Name": "@{item().Table_Name}"
-														}
-													}
-												]
-											},
-											{
-												"name": "GetMaxDatefromSourceTable_copy1",
-												"type": "Lookup",
-												"dependsOn": [
-													{
-														"activity": "CopyDataFull",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "select max(Last_Updated_Time) as MaxD from @{item().Table_Name} ",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00"
-													},
-													"dataset": {
-														"referenceName": "DS_BotDevl_dynamicTable",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												}
-											},
-											{
-												"name": "SetMaxDateinConfig_copy1",
-												"type": "Lookup",
-												"dependsOn": [
-													{
-														"activity": "GetMaxDatefromSourceTable_copy1",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "update stg.Config set MAX_LastUpdatedDate = '@{activity('GetMaxDatefromSourceTable_copy1').output.firstRow.MaxD}'\nwhere table_name like '@{item().Table_Name}'\n\nselect '1'",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00"
-													},
-													"dataset": {
-														"referenceName": "BotDestStgConfigTable",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												}
-											}
-										],
-										"ifTrueActivities": [
-											{
-												"name": "GetMaxDatefromSourceTable",
-												"type": "Lookup",
-												"dependsOn": [
-													{
-														"activity": "Copy data1",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "select max(Last_Updated_Date) as MaxD from @{item().Table_Name} ",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00"
-													},
-													"dataset": {
-														"referenceName": "DS_BotDevl_dynamicTable",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												}
-											},
-											{
-												"name": "Copy data1",
-												"type": "Copy",
-												"dependsOn": [],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": "select * from @{item().Table_Name} where Last_Updated_Date > convert(datetime,'@{item().Max_LastUpdatedDate}')",
-														"queryTimeout": "02:00:00"
-													},
-													"sink": {
-														"type": "AzureSqlSink"
-													},
-													"enableStaging": false,
-													"translator": {
-														"type": "TabularTranslator",
-														"typeConversion": true,
-														"typeConversionSettings": {
-															"allowDataTruncation": true,
-															"treatBooleanAsNumber": false
-														}
-													}
-												},
-												"inputs": [
-													{
-														"referenceName": "DS_BotDevl_dynamicTable",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "BotDestStgDynamicTable",
-														"type": "DatasetReference",
-														"parameters": {
-															"DatasetTable_Name": "@{item().Table_Name}"
-														}
-													}
-												]
-											},
-											{
-												"name": "SetMaxDateinConfig",
-												"type": "Lookup",
-												"dependsOn": [
-													{
-														"activity": "GetMaxDatefromSourceTable",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"timeout": "7.00:00:00",
-													"retry": 0,
-													"retryIntervalInSeconds": 30,
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"source": {
-														"type": "AzureSqlSource",
-														"sqlReaderQuery": {
-															"value": "update stg.Config set MAX_LastUpdatedDate = '@{activity('GetMaxDatefromSourceTable').output.firstRow.MaxD}' where table_name like '@{item().Table_Name}'\n\nselect '1'",
-															"type": "Expression"
-														},
-														"queryTimeout": "02:00:00"
-													},
-													"dataset": {
-														"referenceName": "BotDestStgConfigTable",
-														"type": "DatasetReference",
-														"parameters": {}
-													}
-												}
-											}
-										]
-									}
+							"dataflow": {
+								"referenceName": "SCDType2",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"StagingSalesRep": {},
+									"DimSalesKeyHistory": {},
+									"MAXKEY": {},
+									"InsertFlowSink": {}
 								}
-							]
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
 						}
 					}
 				],
-				"variables": {
-					"Item": {
-						"type": "Array"
-					},
-					"Lookup output1": {
-						"type": "Array"
-					},
-					"Lookup Output2": {
-						"type": "String"
-					}
-				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/BotDestStgConfigTable')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BotDevl_dynamicTable')]",
-				"[concat(variables('factoryId'), '/datasets/BotDestStgDynamicTable')]"
+				"[concat(variables('factoryId'), '/dataflows/SCDType2')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/BotDestStgConfigTable')]",
+			"name": "[concat(parameters('factoryName'), '/SCDType2')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "BotDestStgSalesRep",
+								"type": "DatasetReference"
+							},
+							"name": "StagingSalesRep"
+						},
+						{
+							"dataset": {
+								"referenceName": "BotDestDimSalesKeyHistory",
+								"type": "DatasetReference"
+							},
+							"name": "DimSalesKeyHistory"
+						},
+						{
+							"dataset": {
+								"referenceName": "BotDestDimSalesKeyHistory",
+								"type": "DatasetReference"
+							},
+							"name": "MAXKEY"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "BotDestDimSalesKeyHistory",
+								"type": "DatasetReference"
+							},
+							"name": "InsertFlowSink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "RenameColumns"
+						},
+						{
+							"name": "MaxKeyJoin"
+						},
+						{
+							"name": "LookupDimTable"
+						},
+						{
+							"name": "Split"
+						},
+						{
+							"name": "AddEnabledFlag"
+						},
+						{
+							"name": "AlterRow1"
+						}
+					],
+					"script": "source(output(\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Department as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> StagingSalesRep\nsource(output(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> DimSalesKeyHistory\nsource(output(\n\t\tMAXKEY as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tquery: 'select max(SalesRep_Key) as MAXKEY from dbo.Dim_SalesRepHistory',\n\tformat: 'query') ~> MAXKEY\nDimSalesKeyHistory select(mapColumn(\n\t\tDim_SalesRep_Key = SalesRep_Key,\n\t\tDim_SalesRep_Number = SalesRep_Number,\n\t\tDim_SalesRep_Name = SalesRep_Name,\n\t\tDim_SalesRep_Dept = SalesRep_Dept,\n\t\tCurrentFlag,\n\t\tVerifyField\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> RenameColumns\nStagingSalesRep, MAXKEY join(true(),\n\tjoinType:'cross',\n\tbroadcast: 'auto')~> MaxKeyJoin\nMaxKeyJoin, RenameColumns lookup(SalesRep_Number == Dim_SalesRep_Number,\n\tmultiple: true,\n\tbroadcast: 'auto')~> LookupDimTable\nLookupDimTable split(isNull(Dim_SalesRep_Number),\n\tdisjoint: false) ~> Split@(New, Existing)\nSplit@New derive(EnabledFlag = 1) ~> AddEnabledFlag\nAddEnabledFlag alterRow(insertIf(true()\r\n)) ~> AlterRow1\nAlterRow1 sink(input(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tSalesRep_Number,\n\t\tSalesRep_Name,\n\t\tSalesRep_Dept = SalesRep_Department,\n\t\tCurrentFlag = EnabledFlag\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> InsertFlowSink"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/BotDestStgSalesRep')]",
+				"[concat(variables('factoryId'), '/datasets/BotDestDimSalesKeyHistory')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BotDestStgSalesRep')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -2612,33 +2819,22 @@
 				"type": "AzureSqlTable",
 				"schema": [
 					{
-						"name": "Table_Name",
-						"type": "varchar"
-					},
-					{
-						"name": "Source",
-						"type": "varchar"
-					},
-					{
-						"name": "Max_LastUpdatedDate",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					},
-					{
-						"name": "Enabled",
+						"name": "SalesRep_Number",
 						"type": "int",
 						"precision": 10
 					},
 					{
-						"name": "Incremental_Full_Load",
-						"type": "int",
-						"precision": 10
+						"name": "SalesRep_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "SalesRep_Department",
+						"type": "varchar"
 					}
 				],
 				"typeProperties": {
 					"schema": "stg",
-					"table": "Config"
+					"table": "Sales_Rep"
 				}
 			},
 			"dependsOn": [
@@ -2646,25 +2842,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_BotDevl_dynamicTable')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "botDevlDB",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/botDevlDB')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/BotDestStgDynamicTable')]",
+			"name": "[concat(parameters('factoryName'), '/BotDestDimSalesKeyHistory')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -2672,20 +2850,40 @@
 					"referenceName": "botDest_DB",
 					"type": "LinkedServiceReference"
 				},
-				"parameters": {
-					"DatasetTable_Name": {
-						"type": "string"
-					}
-				},
 				"annotations": [],
 				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": "stg",
-					"table": {
-						"value": "@dataset().DatasetTable_Name",
-						"type": "Expression"
+				"schema": [
+					{
+						"name": "SalesRep_Key",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SalesRep_Number",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SalesRep_Name",
+						"type": "varchar"
+					},
+					{
+						"name": "SalesRep_Dept",
+						"type": "varchar"
+					},
+					{
+						"name": "CurrentFlag",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "VerifyField",
+						"type": "varchar"
 					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Dim_SalesRepHistory"
 				}
 			},
 			"dependsOn": [
