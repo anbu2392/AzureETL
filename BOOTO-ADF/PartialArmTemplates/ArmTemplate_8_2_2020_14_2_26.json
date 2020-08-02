@@ -1,0 +1,106 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "BOOTO-ADF"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/SCDType2')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "BotDestStgSalesRep",
+								"type": "DatasetReference"
+							},
+							"name": "StagingSalesRep"
+						},
+						{
+							"dataset": {
+								"referenceName": "BotDestDimSalesKeyHistory",
+								"type": "DatasetReference"
+							},
+							"name": "DimSalesKeyHistory"
+						},
+						{
+							"dataset": {
+								"referenceName": "BotDestDimSalesKeyHistory",
+								"type": "DatasetReference"
+							},
+							"name": "MAXKEY"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "BotDestDimSalesKeyHistory",
+								"type": "DatasetReference"
+							},
+							"name": "InsertFlowSink"
+						},
+						{
+							"dataset": {
+								"referenceName": "BotDestDimSalesKeyHistory",
+								"type": "DatasetReference"
+							},
+							"name": "UpdateFlagSink"
+						},
+						{
+							"dataset": {
+								"referenceName": "BotDestDimSalesKeyHistory",
+								"type": "DatasetReference"
+							},
+							"name": "InsertupdatedRecords"
+						}
+					],
+					"transformations": [
+						{
+							"name": "RenameColumns"
+						},
+						{
+							"name": "MaxKeyJoin"
+						},
+						{
+							"name": "LookupDimTable"
+						},
+						{
+							"name": "Split"
+						},
+						{
+							"name": "AddEnabledFlag"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "setUpdateFlag"
+						},
+						{
+							"name": "Filter1"
+						},
+						{
+							"name": "AlterRow2"
+						},
+						{
+							"name": "DerivedColumn1"
+						}
+					],
+					"script": "source(output(\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Department as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> StagingSalesRep\nsource(output(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> DimSalesKeyHistory\nsource(output(\n\t\tMAXKEY as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tquery: 'select max(SalesRep_Key) as MAXKEY from dbo.Dim_SalesRepHistory',\n\tformat: 'query') ~> MAXKEY\nDimSalesKeyHistory select(mapColumn(\n\t\tDim_SalesRep_Key = SalesRep_Key,\n\t\tDim_SalesRep_Number = SalesRep_Number,\n\t\tDim_SalesRep_Name = SalesRep_Name,\n\t\tDim_SalesRep_Dept = SalesRep_Dept,\n\t\tCurrentFlag,\n\t\tVerifyField\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> RenameColumns\nStagingSalesRep, MAXKEY join(true(),\n\tjoinType:'cross',\n\tbroadcast: 'auto')~> MaxKeyJoin\nMaxKeyJoin, RenameColumns lookup(SalesRep_Number == Dim_SalesRep_Number,\n\tmultiple: true,\n\tbroadcast: 'auto')~> LookupDimTable\nLookupDimTable split(isNull(Dim_SalesRep_Number),\n\tdisjoint: false) ~> Split@(New, Existing)\nSplit@New derive(EnabledFlag = 1) ~> AddEnabledFlag\nAddEnabledFlag alterRow(insertIf(true())) ~> AlterRow1\nSplit@Existing derive(uCurrentFlag = 0,\n\t\tVerifyField = \"Update\") ~> setUpdateFlag\nsetUpdateFlag filter(Dim_SalesRep_Key <= MAXKEY) ~> Filter1\nFilter1 alterRow(updateIf(true())) ~> AlterRow2\nSplit@Existing derive(uCurrent_Flag = 1,\n\t\tVerifyField = \"New\") ~> DerivedColumn1\nAlterRow1 sink(input(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tSalesRep_Number,\n\t\tSalesRep_Name,\n\t\tSalesRep_Dept = SalesRep_Department,\n\t\tCurrentFlag = EnabledFlag\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> InsertFlowSink\nAlterRow2 sink(input(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['SalesRep_Key'],\n\tformat: 'table',\n\tmapColumn(\n\t\tSalesRep_Number,\n\t\tSalesRep_Name,\n\t\tSalesRep_Dept = SalesRep_Department,\n\t\tCurrentFlag = uCurrentFlag,\n\t\tVerifyField,\n\t\tSalesRep_Key = Dim_SalesRep_Key\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> UpdateFlagSink\nDerivedColumn1 sink(input(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tSalesRep_Number,\n\t\tSalesRep_Name,\n\t\tSalesRep_Dept = SalesRep_Department,\n\t\tCurrentFlag = uCurrent_Flag,\n\t\tVerifyField\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> InsertupdatedRecords"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
