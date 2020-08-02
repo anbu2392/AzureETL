@@ -1,0 +1,31 @@
+{
+	"name": "SCDType2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "BotDestStgSalesRep",
+						"type": "DatasetReference"
+					},
+					"name": "StagingSalesRep"
+				},
+				{
+					"dataset": {
+						"referenceName": "BotDestDimSalesKeyHistory",
+						"type": "DatasetReference"
+					},
+					"name": "DimSalesKeyHistory"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "RenameColumns"
+				}
+			],
+			"script": "source(output(\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Department as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> StagingSalesRep\nsource(output(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> DimSalesKeyHistory\nDimSalesKeyHistory select(mapColumn(\n\t\tDim_SalesRep_Key = SalesRep_Key,\n\t\tDim_SalesRep_Number = SalesRep_Number,\n\t\tDim_SalesRep_Name = SalesRep_Name,\n\t\tDim_SalesRep_Dept = SalesRep_Dept,\n\t\tCurrentFlag,\n\t\tVerifyField\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> RenameColumns"
+		}
+	}
+}

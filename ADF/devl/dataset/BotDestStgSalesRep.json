@@ -1,0 +1,30 @@
+{
+	"name": "BotDestStgSalesRep",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "botDest_DB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "SalesRep_Number",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SalesRep_Name",
+				"type": "varchar"
+			},
+			{
+				"name": "SalesRep_Department",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "stg",
+			"table": "Sales_Rep"
+		}
+	}
+}

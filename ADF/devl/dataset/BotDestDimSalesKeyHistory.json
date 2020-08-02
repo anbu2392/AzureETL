@@ -1,0 +1,44 @@
+{
+	"name": "BotDestDimSalesKeyHistory",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "botDest_DB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "SalesRep_Key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SalesRep_Number",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SalesRep_Name",
+				"type": "varchar"
+			},
+			{
+				"name": "SalesRep_Dept",
+				"type": "varchar"
+			},
+			{
+				"name": "CurrentFlag",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "VerifyField",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Dim_SalesRepHistory"
+		}
+	}
+}
