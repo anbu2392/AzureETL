@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "BOOTO-ADF"
 		},
+		"CommonClusterDB_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'CommonClusterDB'"
+		},
 		"DynamicLinkedService_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'DynamicLinkedService'"
@@ -65,6 +69,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"CommonClusterDB_accessToken": {
+						"value": "[parameters('CommonClusterDB_accessToken')]"
 					},
 					"DynamicLinkedService_connectionString": {
 						"value": "[parameters('DynamicLinkedService_connectionString')]"

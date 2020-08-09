@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "BOOTO-ADF"
 		},
+		"CommonClusterDB_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'CommonClusterDB'"
+		},
 		"DynamicLinkedService_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'DynamicLinkedService'"
@@ -53,6 +57,24 @@
 				"type": "AzureKeyVault",
 				"typeProperties": {
 					"baseUrl": "[parameters('AKV_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CommonClusterDB')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-7554309886958031.11.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('CommonClusterDB_accessToken')]"
+					},
+					"existingClusterId": "0805-090804-barb62"
 				}
 			},
 			"dependsOn": []
@@ -265,6 +287,29 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PubicDS_crimeData2016')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PublicDataset",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "crime-data-2016",
+						"container": "training"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PublicDataset')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/blobdatacsvfile')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -403,30 +448,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PubicDS_crimeData2016')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "PublicDataset",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": "crime-data-2016",
-						"container": "training"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/PublicDataset')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/CopyPipelinePubDataset')]",
+			"name": "[concat(parameters('factoryName'), '/PublicDatasetDBtransformation')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -499,6 +521,38 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "Notebook1",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Copy_o94",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Users/anbu2training@outlook.com/CrimeDataTransformation",
+							"baseParameters": {
+								"accountName": "bottoblobstorage",
+								"accountKey": "z1ecdRTVctWfMuB39kXl0kJc9AsdJfd6NP6onqJctNKNrbwuyf04tsW5SSOZQw0DP4+8NGl9k0QESYSMl+h7yA==",
+								"containerName": "dwtemp"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CommonClusterDB",
+							"type": "LinkedServiceReference"
+						}
 					}
 				],
 				"annotations": []
@@ -506,6 +560,7 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/PubicDS_crimeData2016')]",
 				"[concat(variables('factoryId'), '/datasets/CrimeData2016')]",
+				"[concat(variables('factoryId'), '/linkedServices/CommonClusterDB')]",
 				"[concat(variables('factoryId'), '/linkedServices/bottoblobstorage')]"
 			]
 		},
@@ -619,35 +674,6 @@
 				"typeProperties": {
 					"schema": "stg",
 					"table": "Config"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/botDest_DB')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/BotDestStgDynamicTable')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "botDest_DB",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"DatasetTable_Name": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": "stg",
-					"table": {
-						"value": "@dataset().DatasetTable_Name",
-						"type": "Expression"
-					}
 				}
 			},
 			"dependsOn": [

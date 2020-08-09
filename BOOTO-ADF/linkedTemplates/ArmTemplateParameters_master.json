@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "BOOTO-ADF"
 		},
+		"CommonClusterDB_accessToken": {
+			"value": ""
+		},
 		"DynamicLinkedService_connectionString": {
 			"value": ""
 		},
