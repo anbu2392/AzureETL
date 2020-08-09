@@ -31,6 +31,10 @@
 			"type": "string",
 			"defaultValue": "shareuser"
 		},
+		"PublicDataset_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'PublicDataset'"
+		},
 		"bottoblobstorage_properties_typeProperties_serviceEndpoint": {
 			"type": "string",
 			"defaultValue": "https://bottoblobstorage.blob.core.windows.net"
@@ -170,7 +174,8 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": "select * from stg.Config where Enabled=1;",
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "BotDestStgConfigTable",
@@ -252,7 +257,8 @@
 															"value": "select * from @{item().Table_Name}",
 															"type": "Expression"
 														},
-														"queryTimeout": "02:00:00"
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
 													},
 													"sink": {
 														"type": "AzureSqlSink",
@@ -315,7 +321,8 @@
 															"value": "select max(Last_Updated_Time) as MaxD from @{item().Table_Name} ",
 															"type": "Expression"
 														},
-														"queryTimeout": "02:00:00"
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
 													},
 													"dataset": {
 														"referenceName": "DS_BotDevl_dynamicTable",
@@ -350,7 +357,8 @@
 															"value": "update stg.Config set MAX_LastUpdatedDate = '@{activity('GetMaxDatefromSourceTable_copy1').output.firstRow.MaxD}'\nwhere table_name like '@{item().Table_Name}'\n\nselect '1'",
 															"type": "Expression"
 														},
-														"queryTimeout": "02:00:00"
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
 													},
 													"dataset": {
 														"referenceName": "BotDestStgConfigTable",
@@ -387,7 +395,8 @@
 															"value": "select max(Last_Updated_Date) as MaxD from @{item().Table_Name} ",
 															"type": "Expression"
 														},
-														"queryTimeout": "02:00:00"
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
 													},
 													"dataset": {
 														"referenceName": "DS_BotDevl_dynamicTable",
@@ -415,7 +424,8 @@
 															"value": "select * from @{item().Table_Name} where Last_Updated_Date > convert(datetime,'@{item().Max_LastUpdatedDate}')",
 															"type": "Expression"
 														},
-														"queryTimeout": "02:00:00"
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
 													},
 													"sink": {
 														"type": "AzureSqlSink"
@@ -473,7 +483,8 @@
 															"value": "update stg.Config set MAX_LastUpdatedDate = '@{activity('GetMaxDatefromSourceTable').output.firstRow.MaxD}' where table_name like '@{item().Table_Name}'\n\nselect '1'",
 															"type": "Expression"
 														},
-														"queryTimeout": "02:00:00"
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
 													},
 													"dataset": {
 														"referenceName": "BotDestStgConfigTable",
@@ -734,6 +745,88 @@
 				"[concat(variables('factoryId'), '/datasets/dataCsvFile')]",
 				"[concat(variables('factoryId'), '/datasets/logfilesfromOnpremise')]",
 				"[concat(variables('factoryId'), '/datasets/logfilestoBlob')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CopyPipelinePubDataset')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy_o94",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "training/crime-data-2016/"
+							},
+							{
+								"name": "Destination",
+								"value": "dwtemp/crimeData/"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*"
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": false,
+							"logStorageSettings": {
+								"linkedServiceName": {
+									"referenceName": "bottoblobstorage",
+									"type": "LinkedServiceReference"
+								},
+								"path": "adf-logging"
+							},
+							"skipErrorFile": {
+								"fileMissing": true
+							},
+							"validateDataConsistency": false
+						},
+						"inputs": [
+							{
+								"referenceName": "CrimeData2016",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "CrimeData2016",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/CrimeData2016')]",
+				"[concat(variables('factoryId'), '/linkedServices/bottoblobstorage')]"
 			]
 		},
 		{
@@ -1105,7 +1198,8 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": "select * from dbo.Config where enabled=1",
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "botDevlConfigTable",
@@ -1137,7 +1231,8 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"sink": {
 								"type": "AzureSqlSink",
@@ -1201,7 +1296,8 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"dataset": {
 								"referenceName": "botDevlConfigTable",
@@ -1233,7 +1329,8 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"sink": {
 								"type": "AzureSqlSink",
@@ -1880,6 +1977,29 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/botDevlDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CrimeData2016')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "bottoblobstorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "crimeData",
+						"container": "dwtemp"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/bottoblobstorage')]"
 			]
 		},
 		{
@@ -2573,6 +2693,19 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PublicDataset')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"sasUri": "[parameters('PublicDataset_sasUri')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/botDest_DB')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -2729,7 +2862,7 @@
 							"name": "DerivedColumn1"
 						}
 					],
-					"script": "source(output(\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Department as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> StagingSalesRep\nsource(output(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> DimSalesKeyHistory\nsource(output(\n\t\tMAXKEY as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tquery: 'select max(SalesRep_Key) as MAXKEY from dbo.Dim_SalesRepHistory',\n\tformat: 'query') ~> MAXKEY\nDimSalesKeyHistory select(mapColumn(\n\t\tDim_SalesRep_Key = SalesRep_Key,\n\t\tDim_SalesRep_Number = SalesRep_Number,\n\t\tDim_SalesRep_Name = SalesRep_Name,\n\t\tDim_SalesRep_Dept = SalesRep_Dept,\n\t\tCurrentFlag,\n\t\tVerifyField\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> RenameColumns\nStagingSalesRep, MAXKEY join(true(),\n\tjoinType:'cross',\n\tbroadcast: 'auto')~> MaxKeyJoin\nMaxKeyJoin, RenameColumns lookup(SalesRep_Number == Dim_SalesRep_Number,\n\tmultiple: true,\n\tbroadcast: 'auto')~> LookupDimTable\nLookupDimTable split(isNull(Dim_SalesRep_Number),\n\tdisjoint: false) ~> Split@(New, Existing)\nSplit@New derive(EnabledFlag = 1) ~> AddEnabledFlag\nAddEnabledFlag alterRow(insertIf(true())) ~> AlterRow1\nSplit@Existing derive(uCurrentFlag = 0,\n\t\tVerifyField = \"Update\") ~> setUpdateFlag\nsetUpdateFlag filter(Dim_SalesRep_Key <= MAXKEY) ~> Filter1\nFilter1 alterRow(updateIf(true())) ~> AlterRow2\nSplit@Existing derive(uCurrent_Flag = 1,\n\t\tVerifyField = \"New\") ~> DerivedColumn1\nAlterRow1 sink(input(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tSalesRep_Number,\n\t\tSalesRep_Name,\n\t\tSalesRep_Dept = SalesRep_Department,\n\t\tCurrentFlag = EnabledFlag\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> InsertFlowSink\nAlterRow2 sink(input(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['SalesRep_Key'],\n\tformat: 'table',\n\tmapColumn(\n\t\tSalesRep_Number,\n\t\tSalesRep_Name,\n\t\tSalesRep_Dept = SalesRep_Department,\n\t\tCurrentFlag = uCurrentFlag,\n\t\tVerifyField,\n\t\tSalesRep_Key = Dim_SalesRep_Key\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> UpdateFlagSink\nDerivedColumn1 sink(input(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tSalesRep_Number,\n\t\tSalesRep_Name,\n\t\tSalesRep_Dept = SalesRep_Department,\n\t\tCurrentFlag = uCurrent_Flag,\n\t\tVerifyField\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> InsertupdatedRecords"
+					"script": "source(output(\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Department as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> StagingSalesRep\nsource(output(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> DimSalesKeyHistory\nsource(output(\n\t\tMAXKEY as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tquery: 'select max(SalesRep_Key) as MAXKEY from dbo.Dim_SalesRepHistory',\n\tformat: 'query') ~> MAXKEY\nDimSalesKeyHistory select(mapColumn(\n\t\tDim_SalesRep_Key = SalesRep_Key,\n\t\tDim_SalesRep_Number = SalesRep_Number,\n\t\tDim_SalesRep_Name = SalesRep_Name,\n\t\tDim_SalesRep_Dept = SalesRep_Dept,\n\t\tCurrentFlag,\n\t\tVerifyField\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> RenameColumns\nStagingSalesRep, MAXKEY join(true(),\n\tjoinType:'cross',\n\tbroadcast: 'auto')~> MaxKeyJoin\nMaxKeyJoin, RenameColumns lookup(SalesRep_Number == Dim_SalesRep_Number,\n\tmultiple: true,\n\tbroadcast: 'auto')~> LookupDimTable\nLookupDimTable split(isNull(Dim_SalesRep_Number),\n\tdisjoint: false) ~> Split@(New, Existing)\nSplit@New derive(EnabledFlag = 1) ~> AddEnabledFlag\nAddEnabledFlag alterRow(insertIf(true())) ~> AlterRow1\nSplit@Existing derive(uCurrentFlag = 0,\n\t\tVerifyField = \"Update\") ~> setUpdateFlag\nsetUpdateFlag filter(Dim_SalesRep_Key <= MAXKEY) ~> Filter1\nFilter1 alterRow(updateIf(true())) ~> AlterRow2\nSplit@Existing derive(uCurrent_Flag = 1,\n\t\tVerifyField = \"New\") ~> DerivedColumn1\nAlterRow1 sink(input(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tSalesRep_Number,\n\t\tSalesRep_Name,\n\t\tSalesRep_Dept = SalesRep_Department,\n\t\tCurrentFlag = EnabledFlag\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> InsertFlowSink\nAlterRow2 sink(input(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['SalesRep_Key'],\n\tformat: 'table',\n\tmapColumn(\n\t\tSalesRep_Number = Dim_SalesRep_Number,\n\t\tSalesRep_Name = Dim_SalesRep_Name,\n\t\tSalesRep_Dept = Dim_SalesRep_Dept,\n\t\tCurrentFlag = uCurrentFlag,\n\t\tVerifyField,\n\t\tSalesRep_Key = Dim_SalesRep_Key\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> UpdateFlagSink\nDerivedColumn1 sink(input(\n\t\tSalesRep_Key as integer,\n\t\tSalesRep_Number as integer,\n\t\tSalesRep_Name as string,\n\t\tSalesRep_Dept as string,\n\t\tCurrentFlag as integer,\n\t\tVerifyField as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tSalesRep_Number,\n\t\tSalesRep_Name,\n\t\tSalesRep_Dept = SalesRep_Department,\n\t\tCurrentFlag = uCurrent_Flag,\n\t\tVerifyField\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> InsertupdatedRecords"
 				}
 			},
 			"dependsOn": [

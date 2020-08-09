@@ -23,6 +23,9 @@
 		"OnPremMSI_properties_typeProperties_userId": {
 			"value": "shareuser"
 		},
+		"PublicDataset_sasUri": {
+			"value": ""
+		},
 		"bottoblobstorage_properties_typeProperties_serviceEndpoint": {
 			"value": "https://bottoblobstorage.blob.core.windows.net"
 		},

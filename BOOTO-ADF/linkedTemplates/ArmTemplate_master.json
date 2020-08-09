@@ -31,6 +31,10 @@
 			"type": "string",
 			"defaultValue": "shareuser"
 		},
+		"PublicDataset_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'PublicDataset'"
+		},
 		"bottoblobstorage_properties_typeProperties_serviceEndpoint": {
 			"type": "string",
 			"defaultValue": "https://bottoblobstorage.blob.core.windows.net"
@@ -73,6 +77,9 @@
 					},
 					"AKV_properties_typeProperties_baseUrl": {
 						"value": "[parameters('AKV_properties_typeProperties_baseUrl')]"
+					},
+					"PublicDataset_sasUri": {
+						"value": "[parameters('PublicDataset_sasUri')]"
 					},
 					"bottoblobstorage_properties_typeProperties_serviceEndpoint": {
 						"value": "[parameters('bottoblobstorage_properties_typeProperties_serviceEndpoint')]"
