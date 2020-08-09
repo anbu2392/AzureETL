@@ -25,16 +25,15 @@
 				],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
+						"type": "BinarySource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "*",
 							"wildcardFileName": "*",
-							"enablePartitionDiscovery": false
+							"deleteFilesAfterCompletion": false
 						},
 						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+							"type": "BinaryReadSettings"
 						}
 					},
 					"sink": {
@@ -52,11 +51,14 @@
 						},
 						"path": "adf-logging"
 					},
+					"skipErrorFile": {
+						"fileMissing": true
+					},
 					"validateDataConsistency": false
 				},
 				"inputs": [
 					{
-						"referenceName": "PublicDS_crimedataset2016",
+						"referenceName": "PubicDS_crimeData2016",
 						"type": "DatasetReference"
 					}
 				],
