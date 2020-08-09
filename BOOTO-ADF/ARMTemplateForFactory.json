@@ -780,7 +780,8 @@
 								"storeSettings": {
 									"type": "AzureBlobStorageReadSettings",
 									"recursive": true,
-									"wildcardFileName": "*"
+									"wildcardFileName": "*",
+									"deleteFilesAfterCompletion": false
 								},
 								"formatSettings": {
 									"type": "BinaryReadSettings"
@@ -808,7 +809,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "CrimeData2016",
+								"referenceName": "PubicDS_crimeData2016",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -825,6 +826,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/PubicDS_crimeData2016')]",
 				"[concat(variables('factoryId'), '/datasets/CrimeData2016')]",
 				"[concat(variables('factoryId'), '/linkedServices/bottoblobstorage')]"
 			]
@@ -3049,6 +3051,29 @@
 				"[concat(variables('factoryId'), '/datasets/DS_salesdatafromblob')]",
 				"[concat(variables('factoryId'), '/datasets/BlobCustDataSource')]",
 				"[concat(variables('factoryId'), '/datasets/BotdevlSalesData')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PubicDS_crimeData2016')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PublicDataset",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "crime-data-2016",
+						"container": "training"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PublicDataset')]"
 			]
 		}
 	]

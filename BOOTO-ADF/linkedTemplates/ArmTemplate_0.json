@@ -403,6 +403,29 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PubicDS_crimeData2016')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "PublicDataset",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "crime-data-2016",
+						"container": "training"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/PublicDataset')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/CopyPipelinePubDataset')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -435,7 +458,8 @@
 								"storeSettings": {
 									"type": "AzureBlobStorageReadSettings",
 									"recursive": true,
-									"wildcardFileName": "*"
+									"wildcardFileName": "*",
+									"deleteFilesAfterCompletion": false
 								},
 								"formatSettings": {
 									"type": "BinaryReadSettings"
@@ -463,7 +487,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "CrimeData2016",
+								"referenceName": "PubicDS_crimeData2016",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -480,6 +504,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/PubicDS_crimeData2016')]",
 				"[concat(variables('factoryId'), '/datasets/CrimeData2016')]",
 				"[concat(variables('factoryId'), '/linkedServices/bottoblobstorage')]"
 			]
@@ -623,41 +648,6 @@
 						"value": "@dataset().DatasetTable_Name",
 						"type": "Expression"
 					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/botDest_DB')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/BotDestStgSalesRep')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "botDest_DB",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "SalesRep_Number",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "SalesRep_Name",
-						"type": "varchar"
-					},
-					{
-						"name": "SalesRep_Department",
-						"type": "varchar"
-					}
-				],
-				"typeProperties": {
-					"schema": "stg",
-					"table": "Sales_Rep"
 				}
 			},
 			"dependsOn": [
