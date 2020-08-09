@@ -523,7 +523,7 @@
 						]
 					},
 					{
-						"name": "Notebook1",
+						"name": "CrimeDataTransformation",
 						"type": "DatabricksNotebook",
 						"dependsOn": [
 							{

@@ -752,123 +752,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PublicDatasetDBtransformation')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy_o94",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [
-							{
-								"name": "Source",
-								"value": "training/crime-data-2016/"
-							},
-							{
-								"name": "Destination",
-								"value": "dwtemp/crimeData/"
-							}
-						],
-						"typeProperties": {
-							"source": {
-								"type": "BinarySource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"wildcardFileName": "*",
-									"deleteFilesAfterCompletion": false
-								},
-								"formatSettings": {
-									"type": "BinaryReadSettings"
-								}
-							},
-							"sink": {
-								"type": "BinarySink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								}
-							},
-							"enableStaging": false,
-							"enableSkipIncompatibleRow": false,
-							"logStorageSettings": {
-								"linkedServiceName": {
-									"referenceName": "bottoblobstorage",
-									"type": "LinkedServiceReference"
-								},
-								"path": "adf-logging"
-							},
-							"skipErrorFile": {
-								"fileMissing": true
-							},
-							"validateDataConsistency": false
-						},
-						"inputs": [
-							{
-								"referenceName": "PubicDS_crimeData2016",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "CrimeData2016",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					},
-					{
-						"name": "Notebook1",
-						"type": "DatabricksNotebook",
-						"dependsOn": [
-							{
-								"activity": "Copy_o94",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/Users/anbu2training@outlook.com/CrimeDataTransformation",
-							"baseParameters": {
-								"accountName": "bottoblobstorage",
-								"accountKey": "z1ecdRTVctWfMuB39kXl0kJc9AsdJfd6NP6onqJctNKNrbwuyf04tsW5SSOZQw0DP4+8NGl9k0QESYSMl+h7yA==",
-								"containerName": "dwtemp"
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "CommonClusterDB",
-							"type": "LinkedServiceReference"
-						}
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/PubicDS_crimeData2016')]",
-				"[concat(variables('factoryId'), '/datasets/CrimeData2016')]",
-				"[concat(variables('factoryId'), '/linkedServices/CommonClusterDB')]",
-				"[concat(variables('factoryId'), '/linkedServices/bottoblobstorage')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/CopyPipeline_CustData_BlobToSQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1167,6 +1050,123 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/dataCsvFile')]",
 				"[concat(variables('factoryId'), '/datasets/botdevldb_destination')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PublicDatasetDBtransformation')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy_o94",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Source",
+								"value": "training/crime-data-2016/"
+							},
+							{
+								"name": "Destination",
+								"value": "dwtemp/crimeData/"
+							}
+						],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"deleteFilesAfterCompletion": false
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": false,
+							"logStorageSettings": {
+								"linkedServiceName": {
+									"referenceName": "bottoblobstorage",
+									"type": "LinkedServiceReference"
+								},
+								"path": "adf-logging"
+							},
+							"skipErrorFile": {
+								"fileMissing": true
+							},
+							"validateDataConsistency": false
+						},
+						"inputs": [
+							{
+								"referenceName": "PubicDS_crimeData2016",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "CrimeData2016",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "CrimeDataTransformation",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "Copy_o94",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Users/anbu2training@outlook.com/CrimeDataTransformation",
+							"baseParameters": {
+								"accountName": "bottoblobstorage",
+								"accountKey": "z1ecdRTVctWfMuB39kXl0kJc9AsdJfd6NP6onqJctNKNrbwuyf04tsW5SSOZQw0DP4+8NGl9k0QESYSMl+h7yA==",
+								"containerName": "dwtemp"
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "CommonClusterDB",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/PubicDS_crimeData2016')]",
+				"[concat(variables('factoryId'), '/datasets/CrimeData2016')]",
+				"[concat(variables('factoryId'), '/linkedServices/CommonClusterDB')]",
+				"[concat(variables('factoryId'), '/linkedServices/bottoblobstorage')]"
 			]
 		},
 		{
