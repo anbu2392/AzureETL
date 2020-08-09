@@ -1,0 +1,22 @@
+{
+	"name": "PublicDS_crimedataset2016",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "PublicDataset",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "crime-data-2016",
+				"container": "training"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
