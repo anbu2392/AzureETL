@@ -1,5 +1,5 @@
 {
-	"name": "CopyPipelinePubDataset",
+	"name": "PublicDatasetDBtransformation",
 	"properties": {
 		"activities": [
 			{
